@@ -2,119 +2,177 @@
 using System.Runtime.InteropServices;
 
 public class ReplayKitBridge : MonoBehaviour {
-	[DllImport("__Internal")]
-	private static extern void _rp_startRecording();
-
-	[DllImport("__Internal")]
-	private static extern void _rp_discardRecording();
-
-	[DllImport("__Internal")]
-	private static extern void _rp_stopRecording();
+    #region Declare external C interface
+    #if UNITY_IOS
+    [DllImport("__Internal")]
+    private static extern void _rp_startRecording();
 
     [DllImport("__Internal")]
-	private static extern bool _rp_presentPreviewViewController();
+    private static extern void _rp_discardRecording();
 
     [DllImport("__Internal")]
-	private static extern void _rp_dismissPreviewViewController();
+    private static extern void _rp_stopRecording();
 
     [DllImport("__Internal")]
-	private static extern bool _rp_isScreenRecorderAvailable();
+    private static extern bool _rp_presentPreviewViewController();
 
     [DllImport("__Internal")]
-	private static extern bool _rp_isRecording();
+    private static extern void _rp_dismissPreviewViewController();
 
     [DllImport("__Internal")]
-	private static extern bool _rp_isCameraEnabled();
+    private static extern bool _rp_isScreenRecorderAvailable();
 
     [DllImport("__Internal")]
-	private static extern void _rp_setCameraEnabled(bool cameraEnabled);
+    private static extern bool _rp_isRecording();
 
     [DllImport("__Internal")]
-	private static extern bool _rp_isMicrophoneEnabled();
+    private static extern bool _rp_isCameraEnabled();
 
     [DllImport("__Internal")]
-	private static extern void _rp_setMicrophoneEnabled(bool microphoneEnabled);
+    private static extern void _rp_setCameraEnabled(bool cameraEnabled);
 
-	public static void StartRecording() {
-		_rp_startRecording();
-	}
+    [DllImport("__Internal")]
+    private static extern bool _rp_isMicrophoneEnabled();
 
-	public static void DiscardRecording() {
-		_rp_discardRecording();
-	}
+    [DllImport("__Internal")]
+    private static extern void _rp_setMicrophoneEnabled(bool microphoneEnabled);
+    #endif
+    #endregion
 
-	public static void StopRecording() {
-		_rp_stopRecording();
-	}
+    #region Wrapped methods and properties
+    public static void StartRecording() {
+        #if UNITY_IOS
+        _rp_startRecording();
+        #endif
+    }
 
-	public static bool PresentPreviewViewController() {
-		return _rp_presentPreviewViewController();
-	}
+    public static void DiscardRecording() {
+        #if UNITY_IOS
+        _rp_discardRecording();
+        #endif
+    }
 
-	public static void DismissPreviewViewController() {
-		_rp_dismissPreviewViewController();
-	}
+    public static void StopRecording() {
+        #if UNITY_IOS
+        _rp_stopRecording();
+        #endif
+    }
+
+    public static bool PresentPreviewViewController() {
+        #if UNITY_IOS
+        return _rp_presentPreviewViewController();
+        #else
+        return false;
+        #endif
+    }
+
+    public static void DismissPreviewViewController() {
+        #if UNITY_IOS
+        _rp_dismissPreviewViewController();
+        #endif
+    }
 
     public static bool IsScreenRecorderAvailable {
-    	get { return _rp_isScreenRecorderAvailable(); }
+        get {
+            #if UNITY_IOS
+            return _rp_isScreenRecorderAvailable();
+            #else
+            return false;
+            #endif
+        }
     }
 
     public static bool IsRecording {
-    	get { return _rp_isRecording(); }
+        get {
+            #if UNITY_IOS
+            return _rp_isRecording();
+            #else
+            return false;
+            #endif
+        }
     }
 
-	public static bool IsCameraEnabled {
-		get { return _rp_isCameraEnabled(); }
-		set { _rp_setCameraEnabled(value); }
-	}
+    public static bool IsCameraEnabled {
+        get {
+            #if UNITY_IOS
+            return _rp_isCameraEnabled();
+            #else
+            return false;
+            #endif
+        }
+        set {
+            #if UNITY_IOS
+            _rp_setCameraEnabled(value);
+            #endif
+        }
+    }
 
-	public static bool IsMicrophoneEnabled {
-		get { return _rp_isMicrophoneEnabled(); }
-		set { _rp_setMicrophoneEnabled(value); }
-	}
+    public static bool IsMicrophoneEnabled {
+        get {
+            #if UNITY_IOS
+            return _rp_isMicrophoneEnabled();
+            #else
+            return false;
+            #endif
+        }
+        set {
+            #if UNITY_IOS
+            _rp_setMicrophoneEnabled(value);
+            #endif
+        }
+    }
+    #endregion
 
-	public static System.Action onStartRecordingCallback;
-	public static System.Action onDiscardRecordingCallback;
-	public static System.Action onStopRecordingCallback;
-	public static System.Action<string> onFinishPreviewCallback;
+    #region Singleton implementation
+    private static ReplayKitBridge _sharedInstance;
+    public static ReplayKitBridge SharedInstance {
+        get {
+            if (_sharedInstance == null) {
+                var obj = new GameObject("ReplayKitBridge");
+                _sharedInstance = obj.AddComponent<ReplayKitBridge>();
+            }
+            return _sharedInstance;
+        }
+    }
 
-	private static ReplayKitBridge _sharedInstance;
+    void Awake() {
+        if (_sharedInstance != null) {
+            Destroy(gameObject);
+            return;
+        }
 
-	static ReplayKitBridge() {
-		var obj = new GameObject("ReplayKitBridge");
-		_sharedInstance = obj.AddComponent<ReplayKitBridge>();
-	}
+        DontDestroyOnLoad(gameObject);
+    }
+    #endregion
 
-	void Awake() {
-		if (_sharedInstance != null) {
-			Destroy(gameObject);
-			return;
-		}
+    #region Delegates
+    public System.Action onStartRecordingCallback;
+    public System.Action onDiscardRecordingCallback;
+    public System.Action onStopRecordingCallback;
+    public System.Action<string> onFinishPreviewCallback;
 
-		DontDestroyOnLoad(gameObject);
-	}
+    public void OnStartRecording() {
+        if (onStartRecordingCallback != null) {
+            onStartRecordingCallback.Invoke();
+        }
+    }
 
-	public void OnStartRecording() {
-		if (onStartRecordingCallback != null) {
-			onStartRecordingCallback.Invoke();
-		}
-	}
+    public void OnDiscardRecording() {
+        if (onDiscardRecordingCallback != null) {
+            onDiscardRecordingCallback.Invoke();
+        }
+    }
 
-	public void OnDiscardRecording() {
-		if (onDiscardRecordingCallback != null) {
-			onDiscardRecordingCallback.Invoke();
-		}
-	}
+    public void OnStopRecording() {
+        if (onStopRecordingCallback != null) {
+            onStopRecordingCallback.Invoke();
+        }
+    }
 
-	public void OnStopRecording() {
-		if (onStopRecordingCallback != null) {
-			onStopRecordingCallback.Invoke();
-		}
-	}
-
-	public void OnFinishPreview(string activityType) {
-		if (onFinishPreviewCallback != null) {
-			onFinishPreviewCallback.Invoke(activityType);
-		}
-	}
+    public void OnFinishPreview(string activityType) {
+        if (onFinishPreviewCallback != null) {
+            onFinishPreviewCallback.Invoke(activityType);
+        }
+    }
+    #endregion
 }

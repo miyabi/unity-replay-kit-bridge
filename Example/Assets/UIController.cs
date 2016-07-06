@@ -18,10 +18,11 @@ public class UIController : MonoBehaviour {
 			return;
 		}
 
-		ReplayKitBridge.onStartRecordingCallback = OnStartRecording;
-		ReplayKitBridge.onDiscardRecordingCallback = OnDiscardRecording;
-		ReplayKitBridge.onStopRecordingCallback = OnStopRecording;
-		ReplayKitBridge.onFinishPreviewCallback = OnFinishPreview;
+		// Set up delegates
+		ReplayKitBridge.SharedInstance.onStartRecordingCallback = OnStartRecording;
+		ReplayKitBridge.SharedInstance.onDiscardRecordingCallback = OnDiscardRecording;
+		ReplayKitBridge.SharedInstance.onStopRecordingCallback = OnStopRecording;
+		ReplayKitBridge.SharedInstance.onFinishPreviewCallback = OnFinishPreview;
 
 		// Enable camera and microphone
 		ReplayKitBridge.IsCameraEnabled = true;

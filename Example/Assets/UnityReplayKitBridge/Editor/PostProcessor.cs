@@ -8,7 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
-namespace ReplayKitExample {
+namespace ReplayKitBridge {
 	public static class PostProcessor {
 		internal static DirectoryInfo CopyToDirectory(string srcPath, string destDirPath) {
 			FileSystemInfo srcInfo = null;
@@ -88,12 +88,13 @@ namespace ReplayKitExample {
 				// Disable bitcode
 				proj.SetBuildProperty(targetGuid, "ENABLE_BITCODE", "NO");
 
+				proj.WriteToFile(projPath);
+
 				//// Modify Info.plist
 				string plistPath = buildPath + "/Info.plist";
 
+				// Describe camera usage
 				ExecutePlistBuddyCommand("Add :NSCameraUsageDescription string 'Screen recording'", plistPath);
-
-				proj.WriteToFile(projPath);
 			}
 		}
 	}

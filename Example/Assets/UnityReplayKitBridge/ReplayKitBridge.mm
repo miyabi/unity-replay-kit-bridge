@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import <ReplayKit/ReplayKit.h>
 
-const NSString *kCallbackTarget = @"ReplayKitBridge";
+const char *kCallbackTarget = "ReplayKitBridge";
 
 @interface ReplayKitBridge : NSObject <RPScreenRecorderDelegate, RPPreviewViewControllerDelegate>
 
@@ -29,12 +29,6 @@ static ReplayKitBridge *_sharedInstance = nil;
     return _sharedInstance;
 }
 
-- (void)callback:(NSString *)message withParameter:(NSString *)parameter {
-    UnitySendMessage([kCallbackTarget cStringUsingEncoding:NSUTF8StringEncoding],
-                     [message cStringUsingEncoding:NSUTF8StringEncoding],
-                     [parameter cStringUsingEncoding:NSUTF8StringEncoding]);
-}
-
 #pragma mark - Screen recording
 
 - (void)startRecording {
@@ -49,12 +43,12 @@ static ReplayKitBridge *_sharedInstance = nil;
                 [rootViewController.view addSubview:cameraPreviewView];
             }
 
-            [self callback:@"OnStartRecording" withParameter:@""];
+            UnitySendMessage(kCallbackTarget, "OnStartRecording", "");
         }];
     } else {
         // iOS 9
         [recorder startRecordingWithMicrophoneEnabled:recorder.microphoneEnabled handler:^(NSError * _Nullable error) {
-            [self callback:@"OnStartRecording" withParameter:@""];
+            UnitySendMessage(kCallbackTarget, "OnStartRecording", "");
         }];
     }
 }
@@ -71,7 +65,7 @@ static ReplayKitBridge *_sharedInstance = nil;
     }
 
     [recorder discardRecordingWithHandler:^{
-        [self callback:@"OnDiscardRecording" withParameter:@""];
+        UnitySendMessage(kCallbackTarget, "OnDiscardRecording", "");
     }];
 }
 
@@ -90,7 +84,7 @@ static ReplayKitBridge *_sharedInstance = nil;
         self.previewViewController = previewViewController;
         self.previewViewController.previewControllerDelegate = self;
 
-        [self callback:@"OnStopRecording" withParameter:@""];
+        UnitySendMessage(kCallbackTarget, "OnStopRecording", "");
     }];
 }
 
@@ -115,12 +109,12 @@ static ReplayKitBridge *_sharedInstance = nil;
 #pragma mark - RPPreviewControllerDelegate
 
 - (void)previewControllerDidFinish:(RPPreviewViewController *)previewController {
-    [self callback:@"OnFinishPreview" withParameter:@""];
+    UnitySendMessage(kCallbackTarget, "OnFinishPreview", "");
 }
 
 - (void)previewController:(RPPreviewViewController *)previewController didFinishWithActivityTypes:(NSSet<NSString *> *)activityTypes {
     for (NSString *activityType in activityTypes) {
-        [self callback:@"OnFinishPreview" withParameter:activityType];
+        UnitySendMessage(kCallbackTarget, "OnFinishPreview", activityType.UTF8String);
     }
 }
 

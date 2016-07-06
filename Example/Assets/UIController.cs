@@ -22,8 +22,12 @@ public class UIController : MonoBehaviour {
 		ReplayKitBridge.onDiscardRecordingCallback = OnDiscardRecording;
 		ReplayKitBridge.onStopRecordingCallback = OnStopRecording;
 		ReplayKitBridge.onFinishPreviewCallback = OnFinishPreview;
+
+		// Enable camera and microphone
 		ReplayKitBridge.IsCameraEnabled = true;
 		ReplayKitBridge.IsMicrophoneEnabled = true;
+
+		// And then start recording
 		ReplayKitBridge.StartRecording();
 	}
 
@@ -32,8 +36,11 @@ public class UIController : MonoBehaviour {
 			return;
 		}
 
+		// Disable camera and microphone
 		ReplayKitBridge.IsCameraEnabled = false;
 		ReplayKitBridge.IsMicrophoneEnabled = false;
+
+		// Discard recording
 		ReplayKitBridge.DiscardRecording();
 	}
 
@@ -42,8 +49,11 @@ public class UIController : MonoBehaviour {
 			return;
 		}
 
+		// Disable camera and microphone
 		ReplayKitBridge.IsCameraEnabled = false;
 		ReplayKitBridge.IsMicrophoneEnabled = false;
+
+		// Stop recording
 		ReplayKitBridge.StopRecording();
 	}
 
@@ -57,12 +67,14 @@ public class UIController : MonoBehaviour {
 
 	public void OnStopRecording() {
 		Debug.Log("OnStopRecording");
+
 		Time.timeScale = 0;
 		ReplayKitBridge.PresentPreviewViewController();
 	}
 
 	public void OnFinishPreview(string activityType) {
 		Debug.Log("OnFinishPreview activityType=" + activityType);
+		
 		ReplayKitBridge.DismissPreviewViewController();
 		Time.timeScale = 1;
 	}

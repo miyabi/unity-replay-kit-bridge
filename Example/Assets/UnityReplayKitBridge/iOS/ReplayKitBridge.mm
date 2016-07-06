@@ -38,34 +38,55 @@ static ReplayKitBridge *_sharedInstance = nil;
 #pragma mark - Screen recording
 
 - (void)startRecording {
-    [[RPScreenRecorder sharedRecorder] startRecordingWithHandler:^(NSError * _Nullable error) {
-        UIView *cameraPreviewView = [RPScreenRecorder sharedRecorder].cameraPreviewView;
-        if (cameraPreviewView) {
-            UIViewController *rootViewController = UnityGetGLViewController();
-            [rootViewController.view addSubview:cameraPreviewView];
-        }
-        [self callback:@"OnStartRecording" withParameter:@""];
-    }];
+    RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+    
+    if ([recorder respondsToSelector:@selector(startRecordingWithHandler:)]) {
+        // iOS 10 or later
+        [recorder startRecordingWithHandler:^(NSError * _Nullable error) {
+            UIView *cameraPreviewView = recorder.cameraPreviewView;
+            if (cameraPreviewView) {
+                UIViewController *rootViewController = UnityGetGLViewController();
+                [rootViewController.view addSubview:cameraPreviewView];
+            }
+
+            [self callback:@"OnStartRecording" withParameter:@""];
+        }];
+    } else {
+        // iOS 9
+        [recorder startRecordingWithMicrophoneEnabled:recorder.microphoneEnabled handler:^(NSError * _Nullable error) {
+            [self callback:@"OnStartRecording" withParameter:@""];
+        }];
+    }
 }
 
 - (void)discardRecording {
-    UIView *cameraPreviewView = [RPScreenRecorder sharedRecorder].cameraPreviewView;
-    if (cameraPreviewView) {
-        [cameraPreviewView removeFromSuperview];
+    RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+    
+    if ([recorder respondsToSelector:@selector(cameraPreviewView)]) {
+        // iOS 10 or later
+        UIView *cameraPreviewView = [RPScreenRecorder sharedRecorder].cameraPreviewView;
+        if (cameraPreviewView) {
+            [cameraPreviewView removeFromSuperview];
+        }
     }
 
-    [[RPScreenRecorder sharedRecorder] discardRecordingWithHandler:^{
+    [recorder discardRecordingWithHandler:^{
         [self callback:@"OnDiscardRecording" withParameter:@""];
     }];
 }
 
 - (void)stopRecording {
-    UIView *cameraPreviewView = [RPScreenRecorder sharedRecorder].cameraPreviewView;
-    if (cameraPreviewView) {
-        [cameraPreviewView removeFromSuperview];
+    RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+    
+    if ([recorder respondsToSelector:@selector(cameraPreviewView)]) {
+        // iOS 10 or later
+        UIView *cameraPreviewView = [RPScreenRecorder sharedRecorder].cameraPreviewView;
+        if (cameraPreviewView) {
+            [cameraPreviewView removeFromSuperview];
+        }
     }
     
-    [[RPScreenRecorder sharedRecorder] stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
+    [recorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
         self.previewViewController = previewViewController;
         self.previewViewController.previewControllerDelegate = self;
 
@@ -137,11 +158,22 @@ extern "C" {
     }
 
     BOOL _rp_isCameraEnabled() {
-        return [RPScreenRecorder sharedRecorder].cameraEnabled;
+        RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+        if ([recorder respondsToSelector:@selector(isCameraEnabled)]) {
+            // iOS 10 or later
+            return [RPScreenRecorder sharedRecorder].cameraEnabled;
+        } else {
+            // iOS 9
+            return NO;
+        }
     }
 
     void _rp_setCameraEnabled(BOOL cameraEnabled) {
-        [RPScreenRecorder sharedRecorder].cameraEnabled = cameraEnabled;
+        RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+        if ([recorder respondsToSelector:@selector(setCameraEnabled:)]) {
+            // iOS 10 or later
+            [RPScreenRecorder sharedRecorder].cameraEnabled = cameraEnabled;
+        }
     }
 
     BOOL _rp_isMicrophoneEnabled() {

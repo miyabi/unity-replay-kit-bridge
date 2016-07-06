@@ -7,56 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ReplayKitBridge {
 	public static class PostProcessor {
-		internal static DirectoryInfo CopyToDirectory(string srcPath, string destDirPath) {
-			FileSystemInfo srcInfo = null;
-			if(Directory.Exists(srcPath)) {
-				srcInfo = new DirectoryInfo(srcPath);
-			} else if(File.Exists(srcPath)) {
-				srcInfo = new FileInfo(srcPath);
-			}
-
-			if(srcInfo == null) {
-				UnityEngine.Debug.LogError("File not found: " + srcPath);
-				return null;
-			}
-
-			// Clean up destination
-			if(File.Exists(destDirPath)) {
-				File.Delete(destDirPath);
-			}
-
-			var destDirInfo = new DirectoryInfo(destDirPath);
-			// Create destination directory if needed
-			if(!destDirInfo.Exists) {
-				destDirInfo.Create();
-			}
-
-			var destPath = Path.Combine(destDirInfo.FullName, srcInfo.Name);
-			if(srcInfo.GetType() == typeof(DirectoryInfo)) {
-				// Copy directory contents
-				var destInfo = new DirectoryInfo(destPath);
-				if(destInfo.Exists) {
-					destInfo.Delete(true);
-				}
-				destInfo.Create();
-
-				((DirectoryInfo)srcInfo).GetFiles()
-					.Select(_=>_.CopyTo(Path.Combine(destPath, _.Name), true));
-
-				((DirectoryInfo)srcInfo).GetDirectories()
-					.Select(_=>CopyToDirectory(_.FullName, destPath));
-
-				return destInfo;
-			} else {
-				// Copy just a file
-				((FileInfo)srcInfo).CopyTo(destPath, true);
-				return destDirInfo;
-			}
-		}
-
 		internal static void ExecutePlistBuddyCommand(string command, string path) {
 			using(var process = new Process()) {
 				process.StartInfo.FileName = "/usr/libexec/PlistBuddy";
@@ -82,7 +36,6 @@ namespace ReplayKitBridge {
 				proj.ReadFromFile(projPath);
 
 				var targetGuid = proj.TargetGuidByName(PBXProject.GetUnityTargetName());
-				var debugConfigGuid = proj.BuildConfigByName(targetGuid, "Debug");
 
 				//// Configure build settings
 				// Disable bitcode
@@ -91,10 +44,11 @@ namespace ReplayKitBridge {
 				proj.WriteToFile(projPath);
 
 				//// Modify Info.plist
-				string plistPath = buildPath + "/Info.plist";
+				var plistPath = buildPath + "/Info.plist";
 
 				// Describe camera usage
-				ExecutePlistBuddyCommand("Add :NSCameraUsageDescription string 'Screen recording'", plistPath);
+				var description = Regex.Replace(Config.CameraUsageDescription, "([\\\\'\"])", "\\$1");
+				ExecutePlistBuddyCommand(string.Format("Add :NSCameraUsageDescription string '{0}'", description), plistPath);
 			}
 		}
 	}

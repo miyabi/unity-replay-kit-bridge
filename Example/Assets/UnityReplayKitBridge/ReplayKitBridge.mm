@@ -215,26 +215,26 @@ extern "C" {
     }
 
     BOOL _rp_isScreenRecorderAvailable() {
-        return [ReplayKitBridge sharedInstance].screenRecorderAvailable;
+        return [[ReplayKitBridge sharedInstance] isScreenRecorderAvailable];
     }
 
     BOOL _rp_isRecording() {
-        return [ReplayKitBridge sharedInstance].recording;
+        return [[ReplayKitBridge sharedInstance] isRecording];
     }
 
     BOOL _rp_isCameraEnabled() {
-        return [ReplayKitBridge sharedInstance].cameraEnabled;
+        return [[ReplayKitBridge sharedInstance] isCameraEnabled];
     }
 
     void _rp_setCameraEnabled(BOOL cameraEnabled) {
-        [ReplayKitBridge sharedInstance].cameraEnabled = cameraEnabled;
+        [[ReplayKitBridge sharedInstance] setCameraEnabled:cameraEnabled];
     }
 
     BOOL _rp_isMicrophoneEnabled() {
-        return [ReplayKitBridge sharedInstance].microphoneEnabled;
+        return [[ReplayKitBridge sharedInstance] isMicrophoneEnabled];
     }
 
     void _rp_setMicrophoneEnabled(BOOL microphoneEnabled) {
-        [ReplayKitBridge sharedInstance].microphoneEnabled = microphoneEnabled;
+        [[ReplayKitBridge sharedInstance] setMicrophoneEnabled:microphoneEnabled];
     }
 }

@@ -124,19 +124,19 @@ public class ReplayKitBridge : MonoBehaviour {
     #endregion
 
     #region Singleton implementation
-    private static ReplayKitBridge _sharedInstance;
-    public static ReplayKitBridge SharedInstance {
+    private static ReplayKitBridge _instance;
+    public static ReplayKitBridge Instance {
         get {
-            if (_sharedInstance == null) {
+            if (_instance == null) {
                 var obj = new GameObject("ReplayKitBridge");
-                _sharedInstance = obj.AddComponent<ReplayKitBridge>();
+                _instance = obj.AddComponent<ReplayKitBridge>();
             }
-            return _sharedInstance;
+            return _instance;
         }
     }
 
     void Awake() {
-        if (_sharedInstance != null) {
+        if (_instance != null) {
             Destroy(gameObject);
             return;
         }

@@ -14,10 +14,10 @@ public class ReplayKitBridge : MonoBehaviour {
     private static extern void _rp_stopRecording();
 
     [DllImport("__Internal")]
-    private static extern bool _rp_presentPreviewViewController();
+    private static extern bool _rp_presentPreviewView();
 
     [DllImport("__Internal")]
-    private static extern void _rp_dismissPreviewViewController();
+    private static extern void _rp_dismissPreviewView();
 
     [DllImport("__Internal")]
     private static extern bool _rp_isScreenRecorderAvailable();
@@ -58,17 +58,17 @@ public class ReplayKitBridge : MonoBehaviour {
         #endif
     }
 
-    public static bool PresentPreviewViewController() {
+    public static bool PresentPreviewView() {
         #if UNITY_IOS
-        return _rp_presentPreviewViewController();
+        return _rp_presentPreviewView();
         #else
         return false;
         #endif
     }
 
-    public static void DismissPreviewViewController() {
+    public static void DismissPreviewView() {
         #if UNITY_IOS
-        _rp_dismissPreviewViewController();
+        _rp_dismissPreviewView();
         #endif
     }
 

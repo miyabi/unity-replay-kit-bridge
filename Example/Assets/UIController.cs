@@ -20,7 +20,7 @@ public class UIController : MonoBehaviour {
 
         // Set up delegates
         ReplayKitBridge.Instance.onStartRecordingCallback = OnStartRecording;
-        ReplayKitBridge.Instance.onDiscardRecordingCallback = OnDiscardRecording;
+        ReplayKitBridge.Instance.onCancelRecordingCallback = OnCancelRecording;
         ReplayKitBridge.Instance.onStopRecordingCallback = OnStopRecording;
         ReplayKitBridge.Instance.onFinishPreviewCallback = OnFinishPreview;
 
@@ -32,7 +32,7 @@ public class UIController : MonoBehaviour {
         ReplayKitBridge.StartRecording();
     }
 
-    public void OnPressDiscardRecordingButton() {
+    public void OnPressCancelRecordingButton() {
         if (!ReplayKitBridge.IsRecording) {
             return;
         }
@@ -41,8 +41,8 @@ public class UIController : MonoBehaviour {
         ReplayKitBridge.IsCameraEnabled = false;
         ReplayKitBridge.IsMicrophoneEnabled = false;
 
-        // Discard recording
-        ReplayKitBridge.DiscardRecording();
+        // Cancel recording
+        ReplayKitBridge.CancelRecording();
     }
 
     public void OnPressStopRecordingButton() {
@@ -62,8 +62,8 @@ public class UIController : MonoBehaviour {
         Debug.Log("OnStartRecording");
     }
 
-    public void OnDiscardRecording() {
-        Debug.Log("OnDiscardRecording");
+    public void OnCancelRecording() {
+        Debug.Log("OnCancelRecording");
     }
 
     public void OnStopRecording() {

@@ -8,7 +8,7 @@ public class ReplayKitBridge : MonoBehaviour {
     private static extern void _rp_startRecording();
 
     [DllImport("__Internal")]
-    private static extern void _rp_discardRecording();
+    private static extern void _rp_cancelRecording();
 
     [DllImport("__Internal")]
     private static extern void _rp_stopRecording();
@@ -46,9 +46,9 @@ public class ReplayKitBridge : MonoBehaviour {
         #endif
     }
 
-    public static void DiscardRecording() {
+    public static void CancelRecording() {
         #if UNITY_IOS
-        _rp_discardRecording();
+        _rp_cancelRecording();
         #endif
     }
 
@@ -147,7 +147,7 @@ public class ReplayKitBridge : MonoBehaviour {
 
     #region Delegates
     public System.Action onStartRecordingCallback;
-    public System.Action onDiscardRecordingCallback;
+    public System.Action onCancelRecordingCallback;
     public System.Action onStopRecordingCallback;
     public System.Action<string> onFinishPreviewCallback;
 
@@ -157,9 +157,9 @@ public class ReplayKitBridge : MonoBehaviour {
         }
     }
 
-    public void OnDiscardRecording() {
-        if (onDiscardRecordingCallback != null) {
-            onDiscardRecordingCallback.Invoke();
+    public void OnCancelRecording() {
+        if (onCancelRecordingCallback != null) {
+            onCancelRecordingCallback.Invoke();
         }
     }
 

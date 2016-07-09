@@ -62,21 +62,23 @@ static ReplayKitBridge *_sharedInstance = nil;
                                           }];
 }
 
-- (void)discardRecording {
-    RPScreenRecorder *recorder = [RPScreenRecorder sharedRecorder];
+- (void)cancelRecording {
+    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
 
+    [screenRecorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    if ([recorder respondsToSelector:@selector(cameraPreviewView)]) {
-        // iOS 10 or later
-        UIView *cameraPreviewView = recorder.cameraPreviewView;
-        if (cameraPreviewView) {
-            [cameraPreviewView removeFromSuperview];
+        if ([screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
+            // iOS 10 or later
+            UIView *cameraPreviewView = screenRecorder.cameraPreviewView;
+            if (cameraPreviewView) {
+                [cameraPreviewView removeFromSuperview];
+            }
         }
-    }
 #endif
-
-    [recorder discardRecordingWithHandler:^{
-        UnitySendMessage(kCallbackTarget, "OnDiscardRecording", "");
+        
+        [screenRecorder discardRecordingWithHandler:^{
+            UnitySendMessage(kCallbackTarget, "OnCancelRecording", "");
+        }];
     }];
 }
 
@@ -197,13 +199,13 @@ extern "C" {
     void _rp_startRecording() {
         [[ReplayKitBridge sharedInstance] startRecording];
     }
+    
+    void _rp_cancelRecording() {
+        [[ReplayKitBridge sharedInstance] cancelRecording];
+    }
 
     void _rp_stopRecording() {
         [[ReplayKitBridge sharedInstance] stopRecording];
-    }
-    
-    void _rp_discardRecording() {
-        [[ReplayKitBridge sharedInstance] discardRecording];
     }
     
     BOOL _rp_presentPreviewView() {

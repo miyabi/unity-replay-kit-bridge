@@ -70,13 +70,13 @@ public class UIController : MonoBehaviour {
         Debug.Log("OnStopRecording");
 
         Time.timeScale = 0;
-        ReplayKitBridge.PresentPreviewViewController();
+        ReplayKitBridge.PresentPreviewView();
     }
 
     public void OnFinishPreview(string activityType) {
         Debug.Log("OnFinishPreview activityType=" + activityType);
         
-        ReplayKitBridge.DismissPreviewViewController();
+        ReplayKitBridge.DismissPreviewView();
         Time.timeScale = 1;
     }
 }

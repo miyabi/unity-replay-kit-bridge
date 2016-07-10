@@ -149,6 +149,7 @@ public class ReplayKitBridge : MonoBehaviour {
     public System.Action onStartRecordingCallback;
     public System.Action onCancelRecordingCallback;
     public System.Action onStopRecordingCallback;
+    public System.Action<string> onStopRecordingWithErrorCallback;
     public System.Action<string> onFinishPreviewCallback;
 
     public void OnStartRecording() {
@@ -166,6 +167,12 @@ public class ReplayKitBridge : MonoBehaviour {
     public void OnStopRecording() {
         if (onStopRecordingCallback != null) {
             onStopRecordingCallback.Invoke();
+        }
+    }
+
+    public void OnStopRecordingWithError(string error) {
+        if (onStopRecordingWithErrorCallback != null) {
+            onStopRecordingWithErrorCallback.Invoke(error);
         }
     }
 

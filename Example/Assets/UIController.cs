@@ -22,6 +22,7 @@ public class UIController : MonoBehaviour {
         ReplayKitBridge.Instance.onStartRecordingCallback = OnStartRecording;
         ReplayKitBridge.Instance.onCancelRecordingCallback = OnCancelRecording;
         ReplayKitBridge.Instance.onStopRecordingCallback = OnStopRecording;
+        ReplayKitBridge.Instance.onStopRecordingWithErrorCallback = OnStopRecordingWithError;
         ReplayKitBridge.Instance.onFinishPreviewCallback = OnFinishPreview;
 
         // Enable camera and microphone
@@ -71,6 +72,10 @@ public class UIController : MonoBehaviour {
 
         Time.timeScale = 0;
         ReplayKitBridge.PresentPreviewView();
+    }
+
+    public void OnStopRecordingWithError(string error) {
+        Debug.Log("OnStopRecordingWithError error=" + error);
     }
 
     public void OnFinishPreview(string activityType) {

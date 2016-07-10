@@ -17,7 +17,7 @@ Download unity-replay-kit-bridge.unitypackage from link below:
 
 ## Example
 
-See Example/Assets/Main/Main.unity and UIController.cs.
+See Example/Assets/Main/Main.unity and [UIController.cs](https://github.com/miyabi/unity-replay-kit-bridge/blob/master/Example/Assets/UIController.cs).
 
 ## Usage
 

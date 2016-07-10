@@ -15,6 +15,10 @@ Download unity-replay-kit-bridge.unitypackage from link below:
 2.  Open the downloaded package by double-click or choose Assets menu > Import Package > Custom Package... to import plugin into your project.
 3.  Plugin files are imported into UnityReplayKitBridge folder.
 
+## Example
+
+See Example/Assets/Main/Main.unity and UIController.cs.
+
 ## Usage
 
 ### Properties

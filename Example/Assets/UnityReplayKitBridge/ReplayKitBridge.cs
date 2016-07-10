@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 public class ReplayKitBridge : MonoBehaviour {
     #region Declare external C interface
-    #if UNITY_IOS
+    #if UNITY_IOS && !UNITY_EDITOR
     [DllImport("__Internal")]
     private static extern void _rp_startRecording();
 
@@ -41,25 +41,25 @@ public class ReplayKitBridge : MonoBehaviour {
 
     #region Wrapped methods and properties
     public static void StartRecording() {
-        #if UNITY_IOS
+        #if UNITY_IOS && !UNITY_EDITOR
         _rp_startRecording();
         #endif
     }
 
     public static void CancelRecording() {
-        #if UNITY_IOS
+        #if UNITY_IOS && !UNITY_EDITOR
         _rp_cancelRecording();
         #endif
     }
 
     public static void StopRecording() {
-        #if UNITY_IOS
+        #if UNITY_IOS && !UNITY_EDITOR
         _rp_stopRecording();
         #endif
     }
 
     public static bool PresentPreviewView() {
-        #if UNITY_IOS
+        #if UNITY_IOS && !UNITY_EDITOR
         return _rp_presentPreviewView();
         #else
         return false;
@@ -67,14 +67,14 @@ public class ReplayKitBridge : MonoBehaviour {
     }
 
     public static void DismissPreviewView() {
-        #if UNITY_IOS
+        #if UNITY_IOS && !UNITY_EDITOR
         _rp_dismissPreviewView();
         #endif
     }
 
     public static bool IsScreenRecorderAvailable {
         get {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             return _rp_isScreenRecorderAvailable();
             #else
             return false;
@@ -84,7 +84,7 @@ public class ReplayKitBridge : MonoBehaviour {
 
     public static bool IsRecording {
         get {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             return _rp_isRecording();
             #else
             return false;
@@ -94,14 +94,14 @@ public class ReplayKitBridge : MonoBehaviour {
 
     public static bool IsCameraEnabled {
         get {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             return _rp_isCameraEnabled();
             #else
             return false;
             #endif
         }
         set {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             _rp_setCameraEnabled(value);
             #endif
         }
@@ -109,14 +109,14 @@ public class ReplayKitBridge : MonoBehaviour {
 
     public static bool IsMicrophoneEnabled {
         get {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             return _rp_isMicrophoneEnabled();
             #else
             return false;
             #endif
         }
         set {
-            #if UNITY_IOS
+            #if UNITY_IOS && !UNITY_EDITOR
             _rp_setMicrophoneEnabled(value);
             #endif
         }

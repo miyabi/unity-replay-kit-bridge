@@ -1,6 +1,6 @@
 # Unity ReplayKit Bridge
 
-Native plugin to use ReplayKit with Unity.  
+Native plugin to use [ReplayKit](https://developer.apple.com/reference/replaykit) with [Unity](http://unity3d.com).  
 The ReplayKit framework provides the ability to record video and audio within your app and share it.
 
 ## Downloads

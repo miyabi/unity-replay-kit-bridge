@@ -14,6 +14,7 @@ const char *kCallbackTarget = "ReplayKitBridge";
 @interface ReplayKitBridge : NSObject <RPScreenRecorderDelegate, RPPreviewViewControllerDelegate>
 
 @property (strong, nonatomic) RPPreviewViewController *previewViewController;
+@property (nonatomic, readonly) RPScreenRecorder *screenRecorder;
 @property (nonatomic, readonly) BOOL screenRecorderAvailable;
 @property (nonatomic, readonly) BOOL recording;
 @property (nonatomic) BOOL cameraEnabled;
@@ -33,68 +34,68 @@ static ReplayKitBridge *_sharedInstance = nil;
     return _sharedInstance;
 }
 
+- (RPScreenRecorder *)screenRecorder {
+    return [RPScreenRecorder sharedRecorder];
+}
+
 #pragma mark - Screen recording
 
-- (void)startRecording {
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-
+- (void)addCameraPreviewView {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    if ([screenRecorder respondsToSelector:@selector(startRecordingWithHandler:)]) {
-        [screenRecorder startRecordingWithHandler:^(NSError * _Nullable error) {
-            // iOS 10 or later
-            UIView *cameraPreviewView = screenRecorder.cameraPreviewView;
-            if (cameraPreviewView) {
-                UIViewController *rootViewController = UnityGetGLViewController();
-                [rootViewController.view addSubview:cameraPreviewView];
-            }
+    if ([self.screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
+        // iOS 10 or later
+        UIView *cameraPreviewView = self.screenRecorder.cameraPreviewView;
+        if (cameraPreviewView) {
+            UIViewController *rootViewController = UnityGetGLViewController();
+            [rootViewController.view addSubview:cameraPreviewView];
+        }
+    }
+#endif
+}
 
-            UnitySendMessage(kCallbackTarget, "OnStartRecording", "");
-        }];
-        
+- (void)removeCameraPreviewView {
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
+    if ([self.screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
+        // iOS 10 or later
+        UIView *cameraPreviewView = self.screenRecorder.cameraPreviewView;
+        if (cameraPreviewView) {
+            [cameraPreviewView removeFromSuperview];
+        }
+    }
+#endif
+}
+
+- (void)startRecording {
+    __typeof__(self) __weak weakSelf = self;
+    void (^handler)(NSError * _Nullable) = ^(NSError * _Nullable error){
+        [weakSelf addCameraPreviewView];
+        UnitySendMessage(kCallbackTarget, "OnStartRecording", "");
+    };
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
+    if ([self.screenRecorder respondsToSelector:@selector(startRecordingWithHandler:)]) {
+        // iOS 10 or later
+        [self.screenRecorder startRecordingWithHandler:handler];
         return;
     }
 #endif
 
     // iOS 9
-    [screenRecorder startRecordingWithMicrophoneEnabled:self.microphoneEnabled
-                                                handler:^(NSError * _Nullable error) {
-                                                    UnitySendMessage(kCallbackTarget, "OnStartRecording", "");
-                                                }];
+    [self.screenRecorder startRecordingWithMicrophoneEnabled:self.microphoneEnabled handler:handler];
 }
 
 - (void)cancelRecording {
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-
-    [screenRecorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-        if ([screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
-            // iOS 10 or later
-            UIView *cameraPreviewView = screenRecorder.cameraPreviewView;
-            if (cameraPreviewView) {
-                [cameraPreviewView removeFromSuperview];
-            }
-        }
-#endif
-        
-        [screenRecorder discardRecordingWithHandler:^{
+    [self.screenRecorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
+        [self removeCameraPreviewView];
+        [self.screenRecorder discardRecordingWithHandler:^{
             UnitySendMessage(kCallbackTarget, "OnCancelRecording", "");
         }];
     }];
 }
 
 - (void)stopRecording {
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-    
-    [screenRecorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-        if ([screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
-            // iOS 10 or later
-            UIView *cameraPreviewView = screenRecorder.cameraPreviewView;
-            if (cameraPreviewView) {
-                [cameraPreviewView removeFromSuperview];
-            }
-        }
-#endif
+    [self.screenRecorder stopRecordingWithHandler:^(RPPreviewViewController * _Nullable previewViewController, NSError * _Nullable error) {
+        [self removeCameraPreviewView];
         
         self.previewViewController = previewViewController;
         self.previewViewController.previewControllerDelegate = self;
@@ -122,19 +123,18 @@ static ReplayKitBridge *_sharedInstance = nil;
 }
 
 - (BOOL)isScreenRecorderAvailable {
-    return [RPScreenRecorder sharedRecorder].available;
+    return self.screenRecorder.available;
 }
 
 - (BOOL)isRecording {
-    return [RPScreenRecorder sharedRecorder].recording;
+    return self.screenRecorder.recording;
 }
 
 - (BOOL)isCameraEnabled {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-    if ([screenRecorder respondsToSelector:@selector(isCameraEnabled)]) {
+    if ([self.screenRecorder respondsToSelector:@selector(isCameraEnabled)]) {
         // iOS 10 or later
-        return screenRecorder.cameraEnabled;
+        return self.screenRecorder.cameraEnabled;
     }
 #endif
 
@@ -144,20 +144,18 @@ static ReplayKitBridge *_sharedInstance = nil;
 
 - (void)setCameraEnabled:(BOOL)cameraEnabled {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-    if ([screenRecorder respondsToSelector:@selector(setCameraEnabled:)]) {
+    if ([self.screenRecorder respondsToSelector:@selector(setCameraEnabled:)]) {
         // iOS 10 or later
-        screenRecorder.cameraEnabled = cameraEnabled;
+        self.screenRecorder.cameraEnabled = cameraEnabled;
     }
 #endif
 }
 
 - (BOOL)isMicrophoneEnabled {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-    if ([screenRecorder respondsToSelector:@selector(isMicrophoneEnabled)]) {
+    if ([self.screenRecorder respondsToSelector:@selector(isMicrophoneEnabled)]) {
         // iOS 10 or later
-        return screenRecorder.microphoneEnabled;
+        return self.screenRecorder.microphoneEnabled;
     }
 #endif
 
@@ -167,10 +165,9 @@ static ReplayKitBridge *_sharedInstance = nil;
 
 - (void)setMicrophoneEnabled:(BOOL)microphoneEnabled {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    RPScreenRecorder *screenRecorder = [RPScreenRecorder sharedRecorder];
-    if ([screenRecorder respondsToSelector:@selector(setMicrophoneEnabled:)]) {
+    if ([self.screenRecorder respondsToSelector:@selector(setMicrophoneEnabled:)]) {
         // iOS 10 or later
-        screenRecorder.microphoneEnabled = microphoneEnabled;
+        self.screenRecorder.microphoneEnabled = microphoneEnabled;
         return;
     }
 #endif
@@ -185,15 +182,7 @@ static ReplayKitBridge *_sharedInstance = nil;
 }
 
 - (void)screenRecorder:(RPScreenRecorder *)screenRecorder didStopRecordingWithError:(NSError *)error previewViewController:(RPPreviewViewController *)previewViewController {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 100000 // iOS SDK 10 or later
-    if ([screenRecorder respondsToSelector:@selector(cameraPreviewView)]) {
-        // iOS 10 or later
-        UIView *cameraPreviewView = screenRecorder.cameraPreviewView;
-        if (cameraPreviewView) {
-            [cameraPreviewView removeFromSuperview];
-        }
-    }
-#endif
+    [self removeCameraPreviewView];
 
     self.previewViewController = previewViewController;
     self.previewViewController.previewControllerDelegate = self;

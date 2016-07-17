@@ -1,7 +1,8 @@
 # Unity ReplayKit Bridge
 
 Native plugin to use [ReplayKit](https://developer.apple.com/reference/replaykit) with [Unity](http://unity3d.com).  
-The ReplayKit framework provides the ability to record video and audio within your app and share it.
+The ReplayKit framework provides the ability to record video and audio within your app and share it.  
+Swift-implemented version is [here](https://github.com/miyabi/unity-replay-kit-bridge/tree/swift).
 
 ## Downloads
 

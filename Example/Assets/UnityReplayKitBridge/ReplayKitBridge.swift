@@ -118,7 +118,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     }
 
     func startRecording() {
-        let handler = { (error: NSError?) in
+        let handler = { [unowned self] (error: NSError?) in
             self.addCameraPreviewView()
             UnitySwift.sendMessage(kCallbackTarget, method: "OnStartRecording", message: "")
         }
@@ -137,7 +137,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     }
     
     func cancelRecording() {
-        let handler = { () in
+        let handler = { [unowned self] () in
             self.removeCameraPreviewView()
             UnitySwift.sendMessage(kCallbackTarget, method: "OnCancelRecording", message: "")
         }
@@ -154,7 +154,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     }
     
     func stopRecording() {
-        let handler = { (previewViewController: RPPreviewViewController?, error: NSError?) in
+        let handler = { [unowned self] (previewViewController: RPPreviewViewController?, error: NSError?) in
             self.removeCameraPreviewView()
 
             self.previewViewController = previewViewController

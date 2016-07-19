@@ -98,7 +98,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
             if #available(iOS 10, *) {
                 // iOS 10 or later
                 if let cameraPreviewView = self.screenRecorder.cameraPreviewView {
-                    if let rootViewController = UnitySwift.getGLViewController() {
+                    if let rootViewController = UnityGetGLViewController() {
                         rootViewController.view.addSubview(cameraPreviewView)
                     }
                 }
@@ -120,7 +120,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     func startRecording() {
         let handler = { [unowned self] (error: NSError?) in
             self.addCameraPreviewView()
-            UnitySwift.sendMessage(kCallbackTarget, method: "OnStartRecording", message: "")
+            UnitySendMessage(kCallbackTarget, "OnStartRecording", "")
         }
         
         #if swift(>=3.0) // iOS SDK 10 or later
@@ -139,7 +139,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     func cancelRecording() {
         let handler = { [unowned self] () in
             self.removeCameraPreviewView()
-            UnitySwift.sendMessage(kCallbackTarget, method: "OnCancelRecording", message: "")
+            UnitySendMessage(kCallbackTarget, "OnCancelRecording", "")
         }
         
         #if swift(>=3.0) // iOS SDK 10 or later
@@ -162,7 +162,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
                 previewViewController.previewControllerDelegate = self
             }
             
-            UnitySwift.sendMessage(kCallbackTarget, method: "OnStopRecording", message: "")
+            UnitySendMessage(kCallbackTarget, "OnStopRecording", "")
         }
         
         #if swift(>=3.0) // iOS SDK 10 or later
@@ -174,7 +174,7 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
     
     func presentPreviewView() -> Bool {
         if let previewViewController = self.previewViewController {
-            if let rootViewController = UnitySwift.getGLViewController() {
+            if let rootViewController = UnityGetGLViewController() {
                 #if swift(>=3.0) // iOS SDK 10 or later
                     rootViewController.present(previewViewController, animated: true, completion: nil)
                 #else
@@ -214,18 +214,18 @@ class ReplayKitBridge: NSObject, RPScreenRecorderDelegate, RPPreviewViewControll
             previewViewController.previewControllerDelegate = self;
         }
         
-        UnitySwift.sendMessage(kCallbackTarget, method: "OnStopRecordingWithError", message: error.description);
+        UnitySendMessage(kCallbackTarget, "OnStopRecordingWithError", error.description);
     }
 
     // MARK: - RPPreviewControllerDelegate
 
     func previewControllerDidFinish(_ previewController: RPPreviewViewController) {
-        UnitySwift.sendMessage(kCallbackTarget, method: "OnFinishPreview", message: "");
+        UnitySendMessage(kCallbackTarget, "OnFinishPreview", "");
     }
     
     func previewController(_ previewController: RPPreviewViewController, didFinishWithActivityTypes activityTypes: Set<String>) {
         for activityType in activityTypes {
-            UnitySwift.sendMessage(kCallbackTarget, method: "OnFinishPreview", message: activityType);
+            UnitySendMessage(kCallbackTarget, "OnFinishPreview", activityType);
         }
     }
 }

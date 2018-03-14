@@ -3,6 +3,7 @@
 //  Unity-iPhone
 //
 //  Created by Masayuki Iwai on 6/14/16.
+//  iPad compatability by Bengt Ove Sannes on 14/03/18.
 //
 //
 
@@ -107,6 +108,10 @@ static ReplayKitBridge *_sharedInstance = nil;
 - (BOOL)presentPreviewView {
     if (self.previewViewController) {
         UIViewController *rootViewController = UnityGetGLViewController();
+        if ( [self.previewViewController respondsToSelector:@selector(popoverPresentationController)] ) { 
+            self.previewViewController.preferredContentSize = CGSizeMake(rootViewController.view.frame.size.width * 0.66, rootViewController.view.frame.size.height * 0.66);
+            self.previewViewController.popoverPresentationController.sourceView = rootViewController.view;
+         }
         [rootViewController presentViewController:self.previewViewController animated:YES completion:nil];
         return YES;
     }
